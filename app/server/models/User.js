@@ -4,6 +4,78 @@ var mongoose = require("mongoose"),
   jwt = require("jsonwebtoken");
 JWT_SECRET = process.env.JWT_SECRET;
 
+var org = {
+  type: {
+    type: String,
+    enum: {
+      values: "STARTUP PRV PUB NGO".split(" "),
+    }
+  },
+
+  name: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  no_of_employees: {
+    type: String,
+    enum: {
+      values: "1_5 6_20 21_50 more_50".split(" "),
+    }
+  },
+
+  funding_raised: {
+    type: String,
+    enum: {
+      values: "BOOTSTRAPPED 0_50 50_100 more_100".split(" "),
+    }
+  },
+
+  dpiit: {
+    type: String,
+    enum: {
+      values: "YES NO".split(" "),
+    }
+  },
+
+  address: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  sector: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  website: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  github: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  twitter: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
+  is_indian: {
+    type: String,
+    min: 0,
+    max: 50,
+  }
+}
+
 var profile = {
   // Basic info
   name: {
@@ -25,6 +97,12 @@ var profile = {
   },
 
   school: {
+    type: String,
+    min: 1,
+    max: 150,
+  },
+
+  past_school: {
     type: String,
     min: 1,
     max: 150,
@@ -55,6 +133,12 @@ var profile = {
     max: 300,
   },
 
+  designation: {
+    type: String,
+    min: 0,
+    max: 300,
+  },
+
   essay: {
     type: String,
     min: 0,
@@ -76,28 +160,29 @@ var profile = {
     },
   },
 
+  job_status: {
+    type: String,
+    enum: {
+      values: "EMPLOYED UNEMPLOYED FREELANCER".split(" "),
+    },
+  },
+
   age: {
     type: Number,
     min: 18,
     max: 110,
   },
+
+  category: {
+    type: String,
+    enum: {
+      values: "STUD_PROF IND ORG".split(" "),
+    },
+  },
+
+  org: org,
 };
 
-var theme = {
-  name: {
-    type: String,
-    min: 1,
-    max: 100,
-  },
-};
-
-var subtheme = {
-  name: {
-    type: String,
-    min: 1,
-    max: 100,
-  },
-};
 // Only after confirmed
 var confirmation = {
   phoneNumber: String,
@@ -188,6 +273,19 @@ var status = {
     type: Boolean,
     default: false,
   },
+  conceptNoteSubmitted_one: {
+    type: Boolean,
+    default: false,
+  },
+  conceptNoteSubmitted_two: {
+    type: Boolean,
+    default: false,
+  },
+  conceptNoteSubmitted_three: {
+    type: Boolean,
+    default: false,
+  }
+
 };
 
 // define the schema for our admin model
@@ -256,8 +354,29 @@ var schema = new mongoose.Schema({
   profile: profile,
 
   // User theme
-  theme: theme,
-  subtheme:subtheme,
+  subtheme_one: {
+    name: {
+      type: String,
+      min: 1,
+      max: 100,
+    },
+  },
+
+  subtheme_two: {
+    name: {
+      type: String,
+      min: 1,
+      max: 100,
+    },
+  },
+
+  subtheme_three: {
+    name: {
+      type: String,
+      min: 1,
+      max: 100,
+    },
+  },
 
   /**
    * Confirmation information
@@ -385,12 +504,12 @@ schema.statics.validateProfile = function (profile, cb) {
     !(
       profile.name.length > 0 &&
       /* profile.adult && */
-      profile.school.length > 0 &&
-      profile.nationality.length > 0 &&
-      profile.declaration == true &&
+      /* profile.school.length > 0 && */
+      /* profile.nationality.length > 0 && */
+      profile.declaration == true
       /* ['2016', '2017', '2018', '2019'].indexOf(profile.graduationYear) > -1 && */
-      ["UG", "PG", "PHD", "PDOC", "RF", "PROF"].indexOf(profile.course) > -1 &&
-      ["M", "F", "T", "O", "N"].indexOf(profile.gender) > -1
+      /* ["UG", "PG", "PHD", "PDOC", "RF", "PROF"].indexOf(profile.course) > -1 &&
+      ["M", "F", "T", "O", "N"].indexOf(profile.gender) > -1 */
     )
   );
 };
@@ -426,6 +545,10 @@ schema.virtual("status.name").get(function () {
 
   if (!this.verified) {
     return "unverified";
+  }
+
+  if(this.status.conceptNoteSubmitted) {
+    return 'concept note submitted';
   }
 
   return "incomplete";
